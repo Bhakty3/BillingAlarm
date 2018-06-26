@@ -1,0 +1,197 @@
+{  
+   "AWSTemplateFormatVersion": "2010-09-09",
+   "Description":"AWS CloudFormation Template educate-iam-and-billing-alarm: Creates default IAM User and Billing Alarm.",
+   "Parameters":{  
+      "BillingNotificationEmail":{  
+         "Type":"String",
+         "Default":"bhaktydalsania@gmail.com"
+      },
+      "BillingAlarmThreshold80":{  
+         "Type":"Number",
+         "Default":"80"
+      },
+      "BillingAlarmThreshold100":{  
+         "Type":"Number",
+         "Default":"100"
+      },
+      "IAMPassword":{  
+         "Type":"String",
+         "AllowedPattern":"^.*(?=.{8,})((?=.*[!@#$%^&*()\\-_=+{};:,<.>]){1})(?=.*\\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$"
+      }
+   },
+   "Resources":{  
+      "Redbill":{
+         "Type":"AWS::IAM::User",
+         "Properties":{  
+            "Path":"/",
+            "LoginProfile":{
+               "Password":{ 
+                  "Ref":"IAMPassword"
+               }
+            },
+            "Policies":[  
+               {  
+                  "PolicyName":"billingalarmpolicy",
+                  "PolicyDocument":{  
+                     "Version":"2012-10-17",
+                     "Statement":[  
+                        {  
+                           "Sid": "Stmt1529901564508",
+                           "Effect":"Deny",
+                           "Action": "iam:*",
+                           "Resource": "arn:aws:iam::*"
+                        },
+                        {
+                           "Sid": "Stmt1529901571016",
+                           "Action": "*",
+                           "Effect": "Allow",
+                           "Resource": "*"
+                        }
+                     ]
+                  }
+               }
+            ]
+         }
+      },
+      "BillingAlarmNotification":{  
+         "Type":"AWS::SNS::Topic",
+         "Properties":{  
+            "Subscription":[  
+               {  
+                  "Endpoint":{  
+                     "Ref":"BillingNotificationEmail"
+                  },
+                  "Protocol":"email"
+               }
+            ]
+         }
+      },
+      "SpendingAlarm":{  
+         "Type":"AWS::CloudWatch::Alarm",
+         "Properties":{  
+            "AlarmDescription":{  
+               "Fn::Join":[  
+                  "",
+                  [  
+                     "Alarm if AWS spending is over 80",
+                     {  
+                        "Ref":"BillingAlarmThreshold80"
+                     }
+                  ]
+               ]
+            },
+            "Namespace":"AWS/Billing",
+            "MetricName":"EstimatedCharges",
+            "Dimensions":[  
+               {  
+                  "Name":"Currency",
+                  "Value":"USD"
+               }
+            ],
+            "Statistic":"Maximum",
+            "Period":"21600",
+            "EvaluationPeriods":"1",
+            "Threshold":{  
+               "Ref":"BillingAlarmThreshold80"
+            },
+            "ComparisonOperator":"GreaterThanThreshold",
+            "AlarmActions":[  
+               {  
+                  "Ref":"BillingAlarmNotification"
+               }
+            ],
+            "InsufficientDataActions":[  
+               {  
+                  "Ref":"BillingAlarmNotification"
+               }
+            ],
+         }
+      },
+         "SpendingAlarm1":{  
+         "Type":"AWS::CloudWatch::Alarm",
+         "Properties":{
+         "Policies":[
+            {
+               "PolicyName":"DisableUser",
+               "PolicyDocument":{
+                  "Version": "2012-10-17",
+                  "Statement": [
+                     {
+                        "Sid": "Stmt1529995781482",
+                            "Action": "*",
+                            "Effect": "Deny",
+                            "Resource": "*"
+                     }
+                  ]
+               }
+            }
+         ],
+            "AlarmDescription":{  
+               "Fn::Join":[  
+                  "",
+                  [  
+                     "Alarm if AWS spending is over 100",
+                     {  
+                        "Ref":"BillingAlarmThreshold100"
+                     }
+                  ]
+               ]
+            },
+            "Namespace":"AWS/Billing",
+            "MetricName":"EstimatedCharges",
+            "Dimensions":[  
+               {  
+                  "Name":"Currency",
+                  "Value":"USD"
+               }
+            ],
+            "Statistic":"Maximum",
+            "Period":"21600",
+            "EvaluationPeriods":"1",
+            "Threshold":{  
+               "Ref":"BillingAlarmThreshold100"
+            },
+            "ComparisonOperator":"GreaterThanThreshold",
+            "AlarmActions":[  
+               {  
+                  "Ref":"BillingAlarmNotification"
+               }
+            ],
+            "InsufficientDataActions":[  
+               {  
+                  "Ref":"BillingAlarmNotification"
+               }
+            ]
+         }   
+     }
+   },
+   "Outputs":{  
+      "IAMUserName":{  
+         "Description":"IAM User Name",
+         "Value":{  
+            "Ref": "Redbill"
+         }
+      },
+      "IAMPassword":{  
+         "Description":"IAM Password",
+         "Value":{  
+            "Ref":"IAMPassword"
+         }
+      },
+      "IAMConsoleURL":{  
+         "Description":"IAM Secret Key",
+         "Value":{  
+            "Fn::Join":[  
+               "",
+               [  
+                  "https://",
+                  {  
+                     "Ref":"AWS::AccountId"
+                  },
+                  ".signin.aws.amazon.com/console"
+               ]
+            ]
+         }
+      }
+   }
+}
