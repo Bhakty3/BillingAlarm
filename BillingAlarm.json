@@ -4,7 +4,7 @@
    "Parameters":{  
       "BillingNotificationEmail":{  
          "Type":"String",
-         "Default":"bhaktydalsania@gmail.com",
+         "Default":"abc@gmail.com",
          "Description":"Specify email address on which you want to receive Billig Notification"
       },
       "BillingAlarmThreshold1":{  
