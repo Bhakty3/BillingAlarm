@@ -1,6 +1,6 @@
 {  
    "AWSTemplateFormatVersion": "2010-09-09",
-   "Description":"AWS CloudFormation Template educate-iam-and-billing-alarm: Creates default IAM User and Billing Alarm.",
+   "Description":"AWS CloudFormation Template to create Power user and Billing Notification through email.",
    "Parameters":{  
       "BillingNotificationEmail":{  
          "Type":"String",
@@ -27,7 +27,7 @@
          "Type":"AWS::IAM::User",
          "Properties":{  
             "Path":"/",
-            "UserName":"Redbill",
+            "UserName":"student",
             "LoginProfile":{
                "Password":{ 
                   "Ref":"IAMPassword"
