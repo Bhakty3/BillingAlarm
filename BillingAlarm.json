@@ -4,15 +4,18 @@
    "Parameters":{  
       "BillingNotificationEmail":{  
          "Type":"String",
-         "Default":"bhaktydalsania@gmail.com"
+         "Default":"bhaktydalsania@gmail.com",
+         "Description":"Specify email address on which you want to receive Billig Notification"
       },
-      "BillingAlarmThreshold80":{  
+      "BillingAlarmThreshold1":{  
          "Type":"Number",
-         "Default":"80"
+         "Default":"80",
+         "Description":"Specify value in Dollar, which when excedeed you will receive an Warning email."
       },
-      "BillingAlarmThreshold100":{  
+      "BillingAlarmThreshold2":{  
          "Type":"Number",
-         "Default":"100"
+         "Default":"100",
+         "Description":"Specify value in Dollar, which when excedeed you will receive an Alter email."
       },
       "IAMPassword":{  
          "Type":"String",
@@ -24,6 +27,7 @@
          "Type":"AWS::IAM::User",
          "Properties":{  
             "Path":"/",
+            "UserName":"Redbill",
             "LoginProfile":{
                "Password":{ 
                   "Ref":"IAMPassword"
@@ -73,9 +77,9 @@
                "Fn::Join":[  
                   "",
                   [  
-                     "Alarm if AWS spending is over 80",
+                     "Warning: Alarm if AWS spending is over $80",
                      {  
-                        "Ref":"BillingAlarmThreshold80"
+                        "Ref":"BillingAlarmThreshold1"
                      }
                   ]
                ]
@@ -92,7 +96,7 @@
             "Period":"21600",
             "EvaluationPeriods":"1",
             "Threshold":{  
-               "Ref":"BillingAlarmThreshold80"
+               "Ref":"BillingAlarmThreshold1"
             },
             "ComparisonOperator":"GreaterThanThreshold",
             "AlarmActions":[  
@@ -104,35 +108,19 @@
                {  
                   "Ref":"BillingAlarmNotification"
                }
-            ],
+            ]
          }
       },
          "SpendingAlarm1":{  
          "Type":"AWS::CloudWatch::Alarm",
          "Properties":{
-         "Policies":[
-            {
-               "PolicyName":"DisableUser",
-               "PolicyDocument":{
-                  "Version": "2012-10-17",
-                  "Statement": [
-                     {
-                        "Sid": "Stmt1529995781482",
-                            "Action": "*",
-                            "Effect": "Deny",
-                            "Resource": "*"
-                     }
-                  ]
-               }
-            }
-         ],
             "AlarmDescription":{  
                "Fn::Join":[  
                   "",
                   [  
-                     "Alarm if AWS spending is over 100",
+                     "Alert: Alarm if AWS spending is over $100 and you console access are taken away.",
                      {  
-                        "Ref":"BillingAlarmThreshold100"
+                        "Ref":"BillingAlarmThreshold2"
                      }
                   ]
                ]
@@ -149,7 +137,7 @@
             "Period":"21600",
             "EvaluationPeriods":"1",
             "Threshold":{  
-               "Ref":"BillingAlarmThreshold100"
+               "Ref":"BillingAlarmThreshold2"
             },
             "ComparisonOperator":"GreaterThanThreshold",
             "AlarmActions":[  
@@ -179,7 +167,6 @@
          }
       },
       "IAMConsoleURL":{  
-         "Description":"IAM Secret Key",
          "Value":{  
             "Fn::Join":[  
                "",
