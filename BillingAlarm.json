@@ -5,7 +5,7 @@
       "BillingNotificationEmail":{  
          "Type":"String",
          "Default":"abc@gmail.com",
-         "Description":"Specify email address on which you want to receive Billig Notification"
+         "Description":"Specify email address on which you want to receive Billing Notification"
       },
       "BillingAlarmThreshold1":{  
          "Type":"Number",
@@ -58,6 +58,75 @@
             ]
          }
       },
+	  "DisableUserLambda": {
+		"Type": "AWS::Lambda::Function",
+		"Properties": {
+		  "FunctionName" : "DisableUserFunction",
+		  "Code": {
+			"S3Bucket": "other-name",
+			"S3Key": "lambda.zip" }
+		  ,
+		  "Description": "This function will take away all rights from IAM user",
+		  "MemorySize": 128,
+		  "Handler": "lambda.handler_fun",
+		  "Role": {
+			"Fn::GetAtt": [ "ExecutionRole", "Arn" ]
+		  },
+		  "Timeout": 5,
+		  "Runtime": "python2.7"
+		},
+		"DependsOn": [
+		  "ExecutionRole"
+		]
+	  
+	},
+	  "LambdaInvokePermission": {
+		"Type": "AWS::Lambda::Permission",
+		"Properties": {
+		  "Action": "lambda:InvokeFunction",
+		  "Principal": "sns.amazonaws.com",
+		  "SourceArn": { "Ref": "DisableUserNotification" },
+		  "FunctionName": {
+			"Fn::GetAtt": [ "DisableUserLambda", "Arn" ]
+		  }
+		}
+	  },
+	  "ExecutionRole": {
+		"Type": "AWS::IAM::Role",
+		"Properties": {
+		  "Path": "/",
+		  "Policies": [
+			{
+			  "PolicyName": "CloudwatchLogs",
+			  "PolicyDocument": {
+				"Statement": [
+				  {
+					"Action": [
+					  "logs:CreateLogGroup",
+					  "logs:CreateLogStream",
+					  "logs:GetLogEvents",
+					  "logs:PutLogEvents"
+					],
+					"Resource": [ "arn:aws:logs:*:*:*" ],
+					"Effect": "Allow"
+				  }
+				]
+			  }
+			}
+		  ],
+		  "AssumeRolePolicyDocument": {
+			"Statement": [
+			  {
+				"Action": [ "sts:AssumeRole" ],
+				"Effect": "Allow",
+				"Principal": {
+				  "Service": [ "lambda.amazonaws.com" ]
+				}
+			  }
+			]
+		  }
+		}
+	  },
       "BillingAlarmNotification":{  
          "Type":"AWS::SNS::Topic",
          "Properties":{  
@@ -70,6 +139,26 @@
                }
             ]
          }
+      },
+      "DisableUserNotification":{  
+         "Type":"AWS::SNS::Topic",
+         "Properties":{  
+            "Subscription":[  
+               {  
+                  "Endpoint":{  
+                     "Ref":"BillingNotificationEmail"
+                  },
+                  "Protocol":"email"
+               },
+			   {  
+                  "Endpoint":{  
+                     "Fn::GetAtt": [ "DisableUserLambda", "Arn" ]
+                  },
+                  "Protocol":"lambda"
+               }
+            ]
+         },
+		 "DependsOn":["DisableUserLambda"]
       },
       "SpendingAlarm":{  
          "Type":"AWS::CloudWatch::Alarm",
