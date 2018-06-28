@@ -21,7 +21,7 @@
          "Type":"String",
          "AllowedPattern":"^.*(?=.{8,})((?=.*[!@#$%^&*()\\-_=+{};:,<.>]){1})(?=.*\\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$",
          "Description" : "Password should contain atleast 1 Uppercase,1 Lowercase,1 Numerical,1 symbol and should have length of minimum 8.",
-	 "ConstraintDescription" : "The password didn't satisfy the requirements."
+	 "ConstraintDescription" : "Password didn't satisfy the requirements."
       }
    },
    "Resources":{  
