@@ -63,7 +63,7 @@
 		"Properties": {
 		  "FunctionName" : "DisableUserFunction",
 		  "Code": {
-			"S3Bucket": "other-name",
+			"S3Bucket": "ganpat-aws-student-bucket",
 			"S3Key": "lambda.zip" }
 		  ,
 		  "Description": "This function will take away all rights from IAM user",
